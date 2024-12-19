@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" href="https://necolas.github.io/normalize.css/3.0.2/normalize.css">   
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="estilos.css">   
+    <title>Menu Personal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <style>
+        .dropdown {
+            display: none;
+        }
+        .dropdown.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container relative flex size-full min-h-screen flex-col bg-slate-50 justify-between group/design-root overflow-x-hidden" style="font-family: Manrope, 'Noto Sans', sans-serif;">
+        <div class="container mx-auto p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="user-info">
+                    <img src="https://cdn-icons-png.flaticon.com/512/11356/11356308.png" alt="Usuario" class="w-8 h-8 mr-2">
+                    <span id="username" class="text-[#1e3a8a] font-semibold"></span>
+                </div>
+                <h1 class="title text-[#1e3a8a] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Tareas Grupales</h1>
+                <div class="menu-button">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1756/1756647.png" alt="Menú" class="cursor-pointer w-8 h-8" id="menuButton">
+                    <div class="dropdown" id="dropdownMenu">
+                        <a href="settings.html">Configuración</a>
+                        <a href="login.html" id="logoutButton">Salir</a> 
+                    </div>
+                </div>
+            </div>
+            <div class="add_task">
+                <form id="taskForm1" class="flex flex-row w-full">
+                    <input type="text" id="tareaInput" placeholder="Agregar tarea grupal" class="input-tarea border rounded-md p-1" required>
+                    <input type="submit" class="btn-enviar" value="Agregar Tarea">
+                </form>
+            </div>
+
+            <div class="tareas" style="max-height: 380px; overflow-y: auto;">
+                <ul class="lista" id="lista"></ul>
+            </div>
+
+            <div class="botones-inferiores mt-4 flex justify-around">
+                <a href="dashboard.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Dashboard</a>
+                <a href="owntask.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Mis Tareas</a>
+                <a href="team.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Team</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import supabase from './supabaseClient.js';
+
+        const lista = document.getElementById('lista');
+        const tareaInput = document.getElementById('tareaInput');
+        const userNameElement = document.getElementById('username');
+        const menuButton = document.getElementById('menuButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const logoutButton = document.getElementById('logoutButton');
+
+        // Mostrar el nombre del usuario
+        async function mostrarNombreUsuario() {
+            const userId = localStorage.getItem('userId');
+
+            if (userId) {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('username')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) {
+                    console.error('Error al obtener el usuario:', error);
+                } else {
+                    userNameElement.textContent = data.username;
+                }
+            }
+        }
+
+        // Cargar tareas
+        async function cargarTareas() {
+            const { data, error } = await supabase.from('tareas').select('*');
+
+            if (error) {
+                console.error('Error al cargar tareas:', error);
+                return;
+            }
+
+            data.forEach(tarea => {
+                const li = document.createElement('li');
+                li.textContent = tarea.title; // Cambia 'title' según el nombre de tu columna
+                lista.appendChild(li);
+            });
+        }
+
+        // Agregar tarea
+        document.getElementById('taskForm1').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const nuevaTarea = tareaInput.value;
+
+            const { data, error } = await supabase.from('tareas').insert([{ title: nuevaTarea }]);
+
+            if (error) {
+                console.error('Error al agregar tarea:', error);
+            } else {
+                const li = document.createElement('li');
+                li.textContent = nuevaTarea;
+                lista.appendChild(li);
+                tareaInput.value = '';
+            }
+        });
+
+        // Manejo del menú desplegable
+        menuButton.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('visible');
+        });
+
+        // Cargar datos al inicio
+        mostrarNombreUsuario();
+        cargarTareas();
+        
+        // Cerrar sesión
+        logoutButton.addEventListener('click', async function() {
+            await supabase.auth.signOut();
+            localStorage.removeItem('userId');
+            window.location.href = 'login.html'; // Redirigir a la página de inicio de sesión
+        });
+    </script>
+</body>
+</html>

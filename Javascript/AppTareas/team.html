@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" href="https://necolas.github.io/normalize.css/3.0.2/normalize.css">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="estilos.css">
+    <title>Lista de Usuarios Registrados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        // Inicializar Supabase
+        const supabaseUrl = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+        const supabaseKey = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxAPI';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        async function cargarUsuarios() {
+            // Obtener todos los usuarios registrados desde la base de datos
+            const { data: usuarios, error } = await supabase
+                .from('usuarios') // Asegúrate de que esta sea la tabla correcta
+                .select('*');
+
+            if (error) {
+                console.error('Error al cargar usuarios:', error);
+                alert('No se pudieron cargar los usuarios. Inténtalo más tarde.');
+                return;
+            }
+
+            mostrarUsuariosRegistrados(usuarios);
+        }
+
+        // Función para mostrar usuarios registrados
+        function mostrarUsuariosRegistrados(usuarios) {
+            const listaUsuarios = document.getElementById('lista-usuarios');
+            listaUsuarios.innerHTML = ''; // Limpiar la lista antes de mostrar
+
+            usuarios.forEach((usuario, index) => {
+                const li = document.createElement('li');
+                li.className = "text-[#1e3a8a] font-semibold p-2 border-b border-gray-300"; // Ajustes de estilo
+                li.style.height = '40px'; // Altura fija para todos los campos
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.justifyContent = 'space-between'; // Espacio entre usuario y botón de eliminar
+
+                // Mostrar el nombre de usuario
+                li.textContent = usuario.username;
+
+                // Crear botón de eliminar
+                const eliminarButton = document.createElement('button');
+                eliminarButton.textContent = 'Eliminar';
+                eliminarButton.className = "bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition-colors duration-300";
+                eliminarButton.onclick = () => eliminarUsuario(usuario.id); // Llamar a la función para eliminar el usuario
+                li.appendChild(eliminarButton); // Añadir el botón al elemento li
+
+                listaUsuarios.appendChild(li); // Añadir el li a la lista
+            });
+        }
+
+        // Función para eliminar un usuario
+        async function eliminarUsuario(id) {
+            // Eliminar el usuario de la base de datos
+            const { error } = await supabase
+                .from('usuarios') // Asegúrate de que esta sea la tabla correcta
+                .delete()
+                .eq('id', id); // Asumiendo que tienes una columna 'id' que identifica cada usuario
+
+            if (error) {
+                console.error('Error al eliminar usuario:', error);
+                alert('No se pudo eliminar el usuario. Inténtalo más tarde.');
+                return;
+            }
+
+            cargarUsuarios(); // Recargar la lista de usuarios
+        }
+
+        // Llamar a la función para cargar usuarios al cargar la página
+        document.addEventListener('DOMContentLoaded', cargarUsuarios);
+    </script>
+</head>
+<body>
+    <div class="app-container relative flex size-full min-h-screen flex-col bg-slate-50 justify-between group/design-root overflow-x-hidden" style="font-family: Manrope, 'Noto Sans', sans-serif;">
+        <div class="container mx-auto p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="user-info">
+                    <img src="https://cdn-icons-png.flaticon.com/512/11356/11356308.png" alt="Usuario" class="w-8 h-8 mr-2">
+                    <span id="userName" class="text-[#1e3a8a] font-semibold"></span>
+                </div>
+                <div class="menu-button">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1756/1756647.png" alt="Menú" class="cursor-pointer w-8 h-8" id="menuButton">
+                    <div class="dropdown" id="dropdownMenu">
+                        <a href="settings.html">Configuración</a>
+                        <a href="login.html" id="logoutButton">Salir</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de usuarios registrados -->
+            <div class="usuarios-registrados mt-8" style="max-height: 380px; overflow-y: auto;">
+                <ul class="lista" id="lista-usuarios"></ul>
+            </div>
+
+            <!-- Botón de volver -->
+            <div class="flex justify-around overflow-hidden px-5 pb-5 mt-4">
+                <a href="index.html">
+                    <button class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Inicio</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar nombre de usuario actual
+        const userNameElement = document.getElementById('username');
+        const storedUsername = localStorage.getItem('username');
+        userNameElement.textContent = storedUsername ? `${storedUsername}` : '';
+
+        // Manejo del menú desplegable
+        const menuButton = document.getElementById('menuButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        menuButton.addEventListener('click', () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Cerrar menú al hacer clic en el documento
+        document.addEventListener('click', (event) => {
+            const isClickInside = menuButton.contains(event.target) || dropdownMenu.contains(event.target);
+            if (!isClickInside) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            dropdownMenu.style.display = 'none'; // Ocultar menú
+        });
+    </script>
+</body>
+</html>

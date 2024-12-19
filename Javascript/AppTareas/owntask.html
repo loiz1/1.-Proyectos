@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" href="https://necolas.github.io/normalize.css/3.0.2/normalize.css">   
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="estilos.css">   
+    <title>Menu Personal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <style>
+        .dropdown {
+            display: none;
+        }
+        .dropdown.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container relative flex size-full min-h-screen flex-col bg-slate-50 justify-between group/design-root overflow-x-hidden" style="font-family: Manrope, 'Noto Sans', sans-serif;">
+        <div class="container mx-auto p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="user-info">
+                    <img src="https://cdn-icons-png.flaticon.com/512/11356/11356308.png" alt="Usuario" class="w-8 h-8 mr-2">
+                    <span id="username" class="text-[#1e3a8a] font-semibold"></span>
+                </div>
+                
+                <div class="menu-button">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1756/1756647.png" alt="Menú" class="cursor-pointer w-8 h-8" id="menuButton">
+                    <div class="dropdown" id="dropdownMenu">
+                        <a href="settings.html">Configuración</a>
+                        <a href="login.html" id="logoutButton">Salir</a> 
+                    </div>
+                </div>
+            </div>
+            <div id="taskForm1" class="flex flex-col w-full">
+                <input type="submit" class="btn-creartar" value="Nueva Tarea">
+            </div>
+            <div class="add_task">
+                <form id="taskForm" class="flex flex-row w-full">
+                    <input type="text" id="tareaInput" placeholder="Agrega tu tarea" class="input-tarea border rounded-md p-2" required>
+                    <input type="submit" class="btn-enviar" value="Agregar Tarea">
+                </form>
+            </div>
+            <h1 class="title text-[#1e3a8a] text-lg font-bold leading-tight tracking-[-0.015em] text-center">Tareas Pendientes</h1>
+            <div class="tareas1 mt-4" style="max-height: 130px; overflow-y: auto;">
+                <ul class="lista" id="lista"></ul>
+            </div>
+            <h1 class="title text-[#1e3a8a] text-lg font-bold leading-tight tracking-[-0.015em] text-center">Tareas Realizadas</h1>
+            <div class="tareas mt-4" style="max-height: 210px; overflow-y: auto;">
+                <ul class="lista1" id="lista1"></ul>
+            </div>
+            <div class="tareas mt-4" style="max-height: 210px; overflow-y: auto;">
+                <ul class="lista1" id="lista1"></ul>
+            </div>
+
+            <div class="botones-inferiores mt-4 flex justify-around">
+                <a href="dashboard.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Dashboard</a>
+                <a href="index.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Inicio</a>
+                <a href="team.html" class="btn-inferior bg-[#2db1f9] text-white py-2 px-4 rounded-lg text-center">Team</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import supabase from './supabaseClient.js';
+
+        const lista = document.getElementById('lista');
+        const tareaInput = document.getElementById('tareaInput');
+        const taskForm = document.getElementById('taskForm');
+        const userNameElement = document.getElementById('username'); 
+        const menuButton = document.getElementById('menuButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const logoutButton = document.getElementById('logoutButton');
+
+        async function mostrarTareasPendientes() {
+            const userId = localStorage.getItem('userId');
+
+            if (!userId) {
+                console.error('Usuario no autenticado');
+                window.location.href = 'login.html'; // Redirigir al login si no hay usuario
+                return;
+            }
+
+            const { data: tareas, error } = await supabase
+                .from('tareas')
+                .select('*')
+                .eq('usuario', userId);
+
+            if (error) {
+                console.error('Error al obtener las tareas:', error);
+                return;
+            }
+
+            // Limpiar las listas antes de actualizarlas
+            lista.innerHTML = ''; // Lista de tareas pendientes
+            const lista1 = document.getElementById('lista1'); // Lista de tareas completadas
+            lista1.innerHTML = ''; 
+
+            // Recorrer las tareas y mostrarlas en la lista correspondiente
+            tareas.forEach(tarea => {
+                const li = document.createElement('li');
+
+                // Si la tarea está completada
+                if (tarea.completed) {
+                    li.innerHTML = `
+                        <span class="tarea-completada">${tarea.title}</span> 
+                    `;
+                    lista1.appendChild(li); // Agregar a la lista de "Tareas Realizadas"
+                } else {
+                    li.innerHTML = `
+                        <input type="checkbox" class="completar-checkbox" data-id="${tarea.id}" />
+                        <span class="tarea-title">${tarea.title}</span>
+                    `;
+                    lista.appendChild(li); // Agregar a la lista de "Tareas Pendientes"
+                }
+            });
+
+            // Agregar eventos a los checkboxes de nuevo después de crear las tareas
+            const checkboxes = document.querySelectorAll('.completar-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', async function() {
+                    const tareaId = this.dataset.id;
+                    const completed = this.checked;
+
+                    // Actualizar la tarea en la base de datos
+                    const { error } = await supabase
+                        .from('tareas')
+                        .update({ completed: completed })
+                        .eq('id', tareaId);
+
+                    if (error) {
+                        alert("Error al actualizar la tarea. Por favor, inténtalo de nuevo.");
+                        this.checked = !completed; // Revertir el cambio si hay error
+                    } else {
+                        mostrarTareasPendientes();
+                    }
+                });
+            });
+        }
+
+        // Boton para mostrar input de tarea
+        const btnCrearTarea = document.querySelector('.btn-creartar');
+        const formulario = document.getElementById('taskForm');
+        // Mostrar el formulario al hacer clic en el botón
+        btnCrearTarea.addEventListener('click', () => {
+            formulario.style.display = 'flex';
+        });
+
+        // Manejar el evento de envío del formulario
+        taskForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+
+            const nuevaTarea = tareaInput.value.trim(); // Eliminar espacios en blanco al inicio y final
+
+            // Validación de la entrada
+            if (nuevaTarea === "") {
+                alert("La tarea no puede estar vacía.");
+                return;
+            }
+            if (nuevaTarea.length > 100) {
+                alert("La tarea no puede tener más de 100 caracteres.");
+                return;
+            }
+            const userId = localStorage.getItem('userId');
+
+            const { error } = await supabase
+                .from('tareas')
+                .insert([{ title: nuevaTarea, completed: false, usuario: userId }]);
+
+            if (error) {
+                alert("Error al agregar la tarea. Por favor, inténtalo de nuevo.");
+            } else {
+                tareaInput.value = ''; // Limpiar el campo de entrada
+                mostrarTareasPendientes(); // Actualizar la lista de tareas
+            }
+        });
+
+        // Obtener nombre de usuario
+        async function obtenerNombreUsuario() {
+            const userId = localStorage.getItem('userId');
+
+            if (!userId) {
+                console.error('Usuario no autenticado');
+                window.location.href = 'login.html'; // Redirigir al login si no hay usuario
+                return;
+            }
+
+            const { data: usuario, error } = await supabase
+                .from('usuarios')
+                .select('nombre')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                console.error('Error al obtener el nombre de usuario:', error);
+                return;
+            }
+
+            userNameElement.textContent = usuario.nombre; // Mostrar nombre en la interfaz
+        }
+
+        // Manejador de evento para el botón de menú
+        menuButton.addEventListener('click', function() {
+            dropdownMenu.classList.toggle('visible');
+        });
+
+        // Llamadas a funciones
+        mostrarTareasPendientes();
+        obtenerNombreUsuario();
+    </script>
+</body>
+</html>
