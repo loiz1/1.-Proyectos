@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/estilos.css" />
+    <meta charset="utf-8" />
+    <title>Sistema de Empleados Uniandes</title>
+    <script>
+      function calculateEdad() {
+		const hoy = new Date();
+		const cumpleanos = new Date(document.getElementById('nacimiento').value);
+		const edad = hoy.getFullYear() - cumpleanos.getFullYear();
+		document.getElementById('inputEdad').value = edad;
+
+      }
+
+	  function calculateAntiguedad() {
+		const hoy = new Date();
+		const ingreso = new Date(document.getElementById('ingreso').value);
+		const diffTime = Math.abs(hoy - ingreso);
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+		document.getElementById('inputAntiguedad').value = (diffDays - 1);
+      }
+
+	  function calculatePrestaciones() {
+		const hoy = new Date();
+		const salario = document.getElementById('salario').value
+		const ingreso = new Date(document.getElementById('ingreso').value);
+		const diffTime = Math.abs(hoy - ingreso);
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		const prestaciones = ((diffDays - 1) * parseInt(salario) ) / 12;
+		document.getElementById('inputPrestaciones').value = prestaciones;
+
+      }
+    </script>
+  </head>
+  <body>
+    <form class="form" name="Formulario" action="db.php" method="post">
+      <div>
+        <img src="imagen1.jpg" align="right" />
+        <h4>Datos Personales</h4>
+        <br />
+
+        Nombres: <input class="control" type="text" name="nombres" required />
+        <p>
+          Apellidos:
+          <input class="control" type="text" name="apellidos" required />
+          <p>
+            Sexo: <input class="control" type="text" name="sexo" required />
+            <p>
+              Fecha de nacimiento:
+              <input class="control" type="date" id="nacimiento" name="nacimiento" required />
+              <p>
+                Fecha de ingreso:
+                <input class="control" type="date" id="ingreso" name="ingreso" required />
+                <p></p>
+
+                <hr size="2px" color="gray" />
+              </p>
+
+              <h4>Salario</h4>
+
+              Salario:
+              <input class="control" type="float" id="salario" name="salario" required />
+              <input class="boton" type="button" value="Modificar" />
+            </p>
+
+            <hr size="12px" color="gray" />
+          </p>
+
+          <h4>Cálculos</h4>
+
+          <input
+            class="boton"
+            type="button"
+            onclick="calculateEdad()"
+            name="btnEdad"
+            value="Calcular Edad"
+          />
+          <input class="control" type="float" id="inputEdad" name="edad" /> <br />
+          <input
+            class="boton"
+            type="button"
+			onclick="calculateAntiguedad()"
+            name="btn"
+            value="Calcular Antigüedad"
+          />
+          <input class="control" type="float" id="inputAntiguedad" name="antiguedad" /> <br />
+          <input
+            class="boton"
+            type="button"
+            name="btn"
+			onclick="calculatePrestaciones()"
+            value="Calcular Prestaciones"
+          />
+          <input class="control" type="float" id="inputPrestaciones" name="prestaciones" /> <br />
+        </p>
+
+        <hr size="2px" color="gray" />
+
+        <h4>Puntos de Extension</h4>
+        <input
+          class="boton"
+          type="submit"
+          name="btnRegistrar"
+          value="Registrar"
+        />
+        <input class="boton" type="reset" value="Borrar" />
+      </div>
+    </form>
+  </body>
+</html>
