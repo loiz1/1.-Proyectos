@@ -1,4 +1,4 @@
-## Advertencias
+# Advertencias
 
 **Uso responsable**: Este programa ha sido diseñado con fines educativos y de investigación. No debe ser utilizado sin el consentimiento explícito de todas las personas involucradas en el sistema en el que se ejecuta. El uso de este software para espiar o registrar las actividades de otras personas sin su consentimiento es ilegal y una violación de la privacidad, además de estar en contra de las leyes de muchos países.
 
@@ -12,7 +12,7 @@
 
 **Riesgos de privacidad**: El uso de un keylogger puede poner en riesgo la privacidad de los usuarios y debe ser manejado con extrema cautela. La información registrada por este software podría contener datos personales sensibles, incluyendo contraseñas, datos bancarios y otra información confidencial. Asegúrate de que la información recopilada se maneje de manera adecuada y de acuerdo con las normativas de privacidad aplicables.
 
-# Keylogger Path_Keys
+## Keylogger Path_Keys
 
 Este es un keylogger básico diseñado para ser ejecutado en segundo plano en sistemas Windows. El keylogger registra las teclas presionadas y envía los datos a un correo electrónico. Además, se agrega automáticamente al inicio de Windows.
 
@@ -47,3 +47,8 @@ Este es un keylogger básico diseñado para ser ejecutado en segundo plano en si
 ## Licencia
 
 Este proyecto está bajo la licencia MIT.
+
+
+## Author
+
+loiz1
